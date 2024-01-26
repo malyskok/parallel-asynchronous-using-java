@@ -10,6 +10,7 @@ import java.util.List;
 
 import static com.learnjava.util.CommonUtil.*;
 import static com.learnjava.util.LoggerUtil.log;
+import static java.util.stream.Collectors.summingDouble;
 import static java.util.stream.Collectors.toList;
 
 public class CheckoutService {
@@ -24,7 +25,7 @@ public class CheckoutService {
 
         startTimer();
         List<CartItem> priceValidationList = cart.getCartItemList()
-                //.stream()
+//                .stream()
                 .parallelStream()
                 .map(cartItem -> {
                     boolean isPriceValid = priceValidatorService.isCartItemInvalid(cartItem);
@@ -41,6 +42,25 @@ public class CheckoutService {
             return new CheckoutResponse(CheckoutStatus.FAILURE, priceValidationList);
         }
 
-        return new CheckoutResponse(CheckoutStatus.SUCCESS);
+        double finalRate = calculateFinalPriceWithReduce(cart);
+
+        return new CheckoutResponse(CheckoutStatus.SUCCESS, finalRate);
+    }
+
+    private double calculateFinalPriceWithCollect(Cart cart) {
+        return cart.getCartItemList()
+//                .stream()
+                .parallelStream()
+                .map(item -> item.getQuantity() * item.getRate())
+                .mapToDouble(Double::doubleValue)
+                .sum();
+    }
+
+    private double calculateFinalPriceWithReduce(Cart cart) {
+        return cart.getCartItemList()
+//                .stream()
+                .parallelStream()
+                .map(item -> item.getQuantity() * item.getRate())
+                .reduce(0.0, Double::sum);
     }
 }
