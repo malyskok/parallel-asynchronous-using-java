@@ -44,7 +44,27 @@ class CompletableFutureHelloWorldTest {
         startTimer();
         CompletableFuture<String> future = cfhw.helloworldMultipleAsyncCalls();
 
-        future.thenAccept((result) -> assertEquals("hello world!", result)).join();
+        future.thenAccept((result) -> assertEquals("HELLO WORLD!", result)).join();
+        timeTaken();
+    }
+
+    @Test
+    void helloworld3AsyncCalls() {
+
+        startTimer();
+        String result = cfhw.helloworld3AsyncCalls();
+
+        assertEquals("HELLO WORLD! HI", result);
+        timeTaken();
+    }
+
+    @Test
+    void helloworldComposeAsyncCalls() {
+
+        startTimer();
+        CompletableFuture<String> future = cfhw.helloworldComposeAsyncCalls();
+
+        future.thenAccept((result) -> assertEquals("HELLO WORLD!", result)).join();
         timeTaken();
     }
 }
