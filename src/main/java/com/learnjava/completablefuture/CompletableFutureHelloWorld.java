@@ -43,4 +43,17 @@ public class CompletableFutureHelloWorld {
         return CompletableFuture.supplyAsync(hws::helloWorld)
                 .thenApply(String::toUpperCase);
     }
+
+    public CompletableFuture<String> helloworldWithSize() {
+        return CompletableFuture.supplyAsync(hws::helloWorld)
+                .thenApply(String::toUpperCase)
+                .thenApply(s -> s + s.length());
+    }
+
+    public CompletableFuture<String> helloworldMultipleAsyncCalls(){
+        CompletableFuture<String> hello = CompletableFuture.supplyAsync(hws::hello);
+        CompletableFuture<String> world = CompletableFuture.supplyAsync(hws::world);
+
+        return hello.thenCombine(world, (a, b) -> a + b);
+    }
 }
