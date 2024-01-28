@@ -1,22 +1,37 @@
 package com.learnjava.completablefuture;
 
 import com.learnjava.domain.Product;
+import com.learnjava.service.InventoryService;
 import com.learnjava.service.ProductInfoService;
 import com.learnjava.service.ReviewService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CompletableFuture;
 
-import static com.learnjava.util.CommonUtil.startTimer;
-import static com.learnjava.util.CommonUtil.timeTaken;
+import static com.learnjava.util.CommonUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ProductServiceUsingCompletableFutureTest {
 
     private ProductInfoService productInfoService = new ProductInfoService();
     private ReviewService reviewService = new ReviewService();
+    private InventoryService inventoryService = new InventoryService();
 
-    ProductServiceUsingCompletableFuture productService = new ProductServiceUsingCompletableFuture(productInfoService, reviewService);
+    ProductServiceUsingCompletableFuture productService = new ProductServiceUsingCompletableFuture(
+            productInfoService, reviewService, inventoryService);
+
+    @BeforeEach
+    void beforeEach() {
+        stopWatchReset();
+        startTimer();
+    }
+    @AfterEach
+    void afterEach(){
+        timeTaken();
+        stopWatchReset();
+    }
 
     @Test
     void retrieveProductDetails() {
@@ -30,7 +45,6 @@ class ProductServiceUsingCompletableFutureTest {
 
     @Test
     void retrieveProductDetailsAsServer() {
-        startTimer();
         CompletableFuture<Product> actual = productService.retrieveProductDetailsAsServer("abc");
 
         assertNotNull(actual);
@@ -41,6 +55,25 @@ class ProductServiceUsingCompletableFutureTest {
                     assertNotNull(result.getReview());
                 })
                 .join();
-        timeTaken();
+    }
+
+    @Test
+    void retrieveProductDetailsWithInventory() {
+
+        //given
+        String productId = "ABC123";
+
+        //when
+        Product product = productService.retrieveProductDetailsAsClientWithInventory(productId);
+        System.out.println("product:  " + product);
+
+        //then
+        assertNotNull(product);
+        assertTrue(product.getProductInfo().getProductOptions().size() > 0);
+        product.getProductInfo().getProductOptions().forEach(productOption -> {
+            assertNotNull(productOption.getInventory());
+        });
+
+        assertNotNull(product.getReview());
     }
 }
